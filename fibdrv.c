@@ -51,10 +51,32 @@ static long long fib_original(long long k)
 #endif
 
 #if FIB_METHOD == FAST_DOUBLING
+// ref:
+// https://chunminchang.github.io/blog/post/calculating-fibonacci-numbers-by-fast-doubling
 static long long fib_fast_doubling(long long k)
 {
     /* use fast doubling method */
-    return 0;
+    // F(0) = 0, F(1) = 1, F(2) = 2
+    if (k < 2)
+        return k;
+
+    unsigned long long a = 0, b = 1;
+    unsigned int i =
+        1u << (32 - __builtin_clz(k));  // find the highest set digit of k
+    for (; i; i >>= 1) {
+        unsigned long long c =
+            a * (2 * b - a);  // F(2n) = F(n) * [ 2 * F(n+1) – F(n) ]
+        unsigned long long d = a * a + b * b;  // F(2n+1) = F(n)^2 + F(n+1)^2
+
+        if (i & k) {    // n_j is odd: n = (k_j-1)/2 => k_j = 2n + 1
+            a = d;      //   F(k_j) = F(2n+1)
+            b = c + d;  //   F(k_j + 1) = F(2n + 2) = F(2n) + F(2n+1)
+        } else {        // k_j is even: n = k_j/2 => k_j = 2n
+            a = c;      //   F(k_j) = F(2n)
+            b = d;      //   F(k_j + 1) = F(2n + 1)
+        }
+    }
+    return a;
 }
 #endif
 

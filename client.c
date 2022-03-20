@@ -46,7 +46,7 @@ int main()
 
     FILE *fp = fopen(PATH, "w+");
     if (!fp) {
-        printf("./timestamps not found!\n");
+        printf("Time record error!\n");
     }
 
     for (int i = 0; i <= offset; i++) {
