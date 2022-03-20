@@ -19,13 +19,23 @@ MODULE_VERSION("0.1");
  */
 #define MAX_LENGTH 92
 
+/*
+ * Set the method for calculation fibonacci sequence
+ */
+#define ORIGINAL 0
+#define FAST_DOUBLING 1
+
+#define FIB_METHOD FAST_DOUBLING
+
 static dev_t fib_dev = 0;
 static struct cdev *fib_cdev;
 static struct class *fib_class;
 static DEFINE_MUTEX(fib_mutex);
 
-static long long fib_sequence(long long k)
+#if FIB_METHOD == ORIGINAL
+static long long fib_original(long long k)
 {
+    /* original method */
     /* FIXME: C99 variable-length array (VLA) is not allowed in Linux kernel. */
     long long f[k + 2];
 
@@ -37,6 +47,26 @@ static long long fib_sequence(long long k)
     }
 
     return f[k];
+}
+#endif
+
+#if FIB_METHOD == FAST_DOUBLING
+static long long fib_fast_doubling(long long k)
+{
+    /* use fast doubling method */
+    return 0;
+}
+#endif
+
+static long long fib_sequence(long long k)
+{
+#if FIB_METHOD == ORIGINAL
+    return fib_original(k);
+#elif FIB_METHOD == FAST_DOUBLING
+    return fib_fast_doubling(k);
+#else
+    return -1;
+#endif
 }
 
 static int fib_open(struct inode *inode, struct file *file)
@@ -60,7 +90,11 @@ static ssize_t fib_read(struct file *file,
                         size_t size,
                         loff_t *offset)
 {
-    return (ssize_t) fib_sequence(*offset);
+    ktime_t kt_start = ktime_get();
+    ssize_t result = fib_sequence(*offset);
+    ktime_t duration = ktime_get() - kt_start;
+    printk(KERN_DEBUG "%lld %lld", *offset, ktime_to_ns(duration));
+    return result;
 }
 
 /* write operation is skipped */
