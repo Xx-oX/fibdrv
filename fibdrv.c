@@ -64,7 +64,7 @@ static long long fib_fast_doubling(long long k)
 
     unsigned long long a = 0, b = 1;
     unsigned int i =
-        1u << (32 - __builtin_clz(k));  // find the highest set digit of k
+        1u << (31 - __builtin_clz(k));  // find the highest set digit of k
     for (; i; i >>= 1) {
         unsigned long long c =
             a * (2 * b - a);  // F(2n) = F(n) * [ 2 * F(n+1) – F(n) ]
