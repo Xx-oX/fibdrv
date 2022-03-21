@@ -27,6 +27,8 @@ MODULE_VERSION("0.1");
 
 #define FIB_METHOD FAST_DOUBLING
 
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 static dev_t fib_dev = 0;
 static struct cdev *fib_cdev;
 static struct class *fib_class;
@@ -57,7 +59,7 @@ static long long fib_fast_doubling(long long k)
 {
     /* use fast doubling method */
     // F(0) = 0, F(1) = 1, F(2) = 2
-    if (k < 2)
+    if (unlikely(k < 2))
         return k;
 
     unsigned long long a = 0, b = 1;
